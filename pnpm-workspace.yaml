@@ -1,0 +1,9 @@
+packages:
+  - test/app
+
+allowBuilds:
+  '@parcel/watcher': true
+  core-js: false
+  esbuild: true
+  msw: false
+  unrs-resolver: true

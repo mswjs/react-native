@@ -1,0 +1,78 @@
+{
+  "type": "module",
+  "name": "@msw/react-native",
+  "version": "0.0.0",
+  "description": "Mock Service Worker integration for React Native.",
+  "scripts": {
+    "dev": "tsup --watch",
+    "build": "tsup",
+    "test": "pnpm --dir test/app test",
+    "typecheck": "tsc --noEmit && pnpm --dir test/app typecheck",
+    "prepack": "pnpm build",
+    "lint": "oxlint src test/app/tests test/app/scripts test/app/*.js test/app/*.mjs *.ts",
+    "publint": "publint",
+    "test:build:ios": "pnpm --dir test/app build:ios"
+  },
+  "main": "./lib/index.js",
+  "module": "./lib/index.js",
+  "types": "./lib/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./lib/index.d.ts",
+      "default": "./lib/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "lib",
+    "src"
+  ],
+  "sideEffects": true,
+  "keywords": [
+    "native",
+    "react-native",
+    "mock",
+    "test",
+    "network",
+    "api",
+    "http",
+    "graphql",
+    "websocket"
+  ],
+  "author": "Artem Zakharchenko <kettanaito@gmail.com>",
+  "license": "MIT",
+  "homepage": "https://mswjs.io",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mswjs/react-native.git"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "devEngines": {
+    "packageManager": {
+      "name": "pnpm",
+      "version": "^11.5.2",
+      "onFail": "download"
+    }
+  },
+  "peerDependencies": {
+    "msw": "^2.15.0",
+    "react-native": "*"
+  },
+  "dependencies": {
+    "@mswjs/interceptors": "^0.42.4",
+    "core-js": "^3.50.0",
+    "fast-text-encoding": "^1.0.6",
+    "react-native-url-polyfill": "^4.0.0",
+    "web-streams-polyfill": "^4.3.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "msw": "^2.15.0",
+    "oxlint": "^1.82.0",
+    "publint": "^0.3.24",
+    "tsup": "^8.5.1",
+    "typescript": "~7.0.0"
+  }
+}
