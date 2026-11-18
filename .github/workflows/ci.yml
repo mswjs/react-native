@@ -31,14 +31,15 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Check types
-        run: pnpm typecheck
-
       - name: Lint
         run: pnpm lint
 
       - name: Build
         run: pnpm build
+
+      # The test app resolves "@msw/react-native" types from the build output.
+      - name: Check types
+        run: pnpm typecheck
 
       - name: Validate package
         run: pnpm publint
