@@ -62,6 +62,13 @@ jobs:
       - name: Test in iOS simulator
         run: pnpm test
 
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: build-artifacts
+          path: ./lib
+          if-no-files-found: error
+
       - name: Upload native test results
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
@@ -107,6 +114,13 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+
+      # Release the exact build that was tested.
+      - name: Download build artifacts
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c
+        with:
+          name: build-artifacts
+          path: ./lib
 
       - name: Release
         run: pnpm release
