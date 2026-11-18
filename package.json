@@ -11,7 +11,8 @@
     "prepack": "pnpm build",
     "lint": "oxlint src test/app/tests test/app/scripts test/app/*.js test/app/*.mjs *.ts",
     "publint": "publint",
-    "test:build:ios": "pnpm --dir test/app build:ios"
+    "test:build:ios": "pnpm --dir test/app build:ios",
+    "release": "release publish"
   },
   "main": "./lib/index.js",
   "module": "./lib/index.js",
@@ -68,6 +69,7 @@
     "web-streams-polyfill": "^4.5.1"
   },
   "devDependencies": {
+    "@ossjs/release": "^0.11.2",
     "@types/node": "^24.0.0",
     "msw": "^3.0.6",
     "oxlint": "^1.94.0",
