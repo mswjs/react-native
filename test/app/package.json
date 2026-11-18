@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@msw/react-native": "workspace:*",
-    "msw": "^2.15.0",
+    "msw": "^3.0.6",
     "react": "19.2.3",
     "react-native": "0.87.1"
   },

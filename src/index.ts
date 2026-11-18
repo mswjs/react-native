@@ -1,4 +1,4 @@
-import './polyfills.js'
+import './polyfills/index.js'
 import { FetchInterceptor } from '@mswjs/interceptors/fetch/web'
 import { XMLHttpRequestInterceptor } from '@mswjs/interceptors/XMLHttpRequest/web'
 import { defineNetwork, InterceptorSource } from 'msw/experimental'

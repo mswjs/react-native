@@ -1,6 +1,9 @@
 name: ci
 
 on:
+  push:
+    branches: [main]
+  pull_request:
   workflow_dispatch:
 
 permissions:
@@ -11,22 +14,22 @@ jobs:
     runs-on: blacksmith-6vcpu-macos-26
     timeout-minutes: 25
     steps:
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+      - name: Checkout
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
 
-      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e
+      - name: Set up pnpm
+        uses: pnpm/action-setup@0e279bb959325dab635dd2c09392533439d90093
+        with:
+          version: 11.26.0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e
         with:
           node-version: 24
           cache: 'pnpm'
 
-      - uses: pnpm/action-setup@0e279bb959325dab635dd2c09392533439d90093
-        with:
-          version: 11.26.0
-
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
-
-      - name: Check types
-        run: pnpm typecheck
 
       - name: Lint
         run: pnpm lint
@@ -34,8 +37,20 @@ jobs:
       - name: Build
         run: pnpm build
 
+      # The test app resolves "@msw/react-native" types from the build output.
+      - name: Check types
+        run: pnpm typecheck
+
       - name: Validate package
         run: pnpm publint
+
+      # "pod install --deployment" fails if the CocoaPods version
+      # differs from the one recorded in the lockfile.
+      - name: Install CocoaPods
+        working-directory: test/app/ios
+        run: |
+          gem install cocoapods --version "$(awk '/^COCOAPODS:/ { print $2 }' Podfile.lock)" --no-document
+          pod --version
 
       - name: Install iOS pods
         working-directory: test/app/ios
@@ -54,3 +69,46 @@ jobs:
           name: native-test-results
           path: test/app/.harness/results.json
           if-no-files-found: ignore
+
+  release:
+    needs: [test]
+    if: github.ref == 'refs/heads/main'
+    # npm accepts provenance attestations only from GitHub-hosted runners,
+    # so the publish job must not run on Blacksmith.
+    runs-on: ubuntu-latest
+    concurrency:
+      group: release
+      cancel-in-progress: false
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GH_ADMIN_TOKEN }}
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@0e279bb959325dab635dd2c09392533439d90093
+        with:
+          version: 11.26.0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e
+        with:
+          # Trusted Publishing only works on Node.js v24.
+          node-version: 24
+
+      - name: Setup Git
+        run: |
+          git config --local user.name "Artem Zakharchenko"
+          git config --local user.email "kettanaito@gmail.com"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Release
+        run: pnpm release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_ADMIN_TOKEN }}
