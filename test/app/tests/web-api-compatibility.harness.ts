@@ -78,3 +78,40 @@ test('marks a response body used when read through its stream', async () => {
   expect(response.bodyUsed).toBe(true)
   await expect(response.text()).rejects.toThrow(TypeError)
 })
+
+test('reads a Blob response body through its stream', async () => {
+  const response = new Response(new Blob(['hello']))
+  const reader = response.body!.getReader()
+
+  await expect(reader.read()).resolves.toEqual({
+    done: false,
+    value: new TextEncoder().encode('hello'),
+  })
+  await expect(reader.read()).resolves.toEqual({
+    done: true,
+    value: undefined,
+  })
+})
+
+test('reads cloned stream response bodies independently', async () => {
+  const stream = new ReadableStream<Uint8Array>({
+    start(controller) {
+      controller.enqueue(new TextEncoder().encode('hello'))
+      controller.close()
+    },
+  })
+
+  // @ts-expect-error React Native also omits standard stream bodies from its Response types.
+  const response = new Response(stream)
+  const clone = response.clone()
+
+  await expect(clone.text()).resolves.toBe('hello')
+  expect(response.bodyUsed).toBe(false)
+  await expect(response.text()).resolves.toBe('hello')
+})
+
+test('does not expose a body for a response without one', () => {
+  const response = new Response(null, { status: 204 })
+
+  expect(response.body).toBeNull()
+})

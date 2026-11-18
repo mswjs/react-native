@@ -106,3 +106,59 @@ test('reads a POST body in a request handler', async () => {
 
   await expect(response.json()).resolves.toEqual({ name: 'Kate' })
 })
+
+test('responds to a fetch request with a mocked stream', async () => {
+  network.use(
+    http.get('https://msw.test/stream', () => {
+      const stream = new ReadableStream<Uint8Array>({
+        start(controller) {
+          controller.enqueue(new TextEncoder().encode('hel'))
+          controller.enqueue(new TextEncoder().encode('lo'))
+          controller.close()
+        },
+      })
+
+      return new HttpResponse(stream, {
+        headers: { 'Content-Type': 'text/plain' },
+      })
+    }),
+  )
+
+  const response = await fetch('https://msw.test/stream')
+
+  await expect(response.text()).resolves.toBe('hello')
+})
+
+test('responds to an XMLHttpRequest request with a mocked stream', async () => {
+  network.use(
+    http.get('https://msw.test/stream', () => {
+      const stream = new ReadableStream<Uint8Array>({
+        start(controller) {
+          controller.enqueue(new TextEncoder().encode('hel'))
+          controller.enqueue(new TextEncoder().encode('lo'))
+          controller.close()
+        },
+      })
+
+      return new HttpResponse(stream, {
+        headers: { 'Content-Type': 'text/plain' },
+      })
+    }),
+  )
+
+  const response = new Promise<string>((resolve, reject) => {
+    const request = new XMLHttpRequest()
+    request.open('GET', 'https://msw.test/stream')
+
+    request.onload = () => {
+      resolve(request.responseText)
+    }
+
+    request.onerror = () => {
+      reject(new Error('XMLHttpRequest failed'))
+    }
+    request.send()
+  })
+
+  await expect(response).resolves.toBe('hello')
+})
