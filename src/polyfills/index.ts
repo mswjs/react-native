@@ -1,0 +1,8 @@
+import 'core-js/modules/es.promise.with-resolvers'
+import 'fast-text-encoding'
+import './url.js'
+import './events.js'
+import './xml-http-request-upload.js'
+import './broadcast-channel.js'
+import './headers.js'
+import './streams.js'

@@ -1,4 +1,4 @@
-import { expect, test } from 'react-native-harness'
+import { afterAll, expect, test } from 'react-native-harness'
 
 const apiNames = [
   'URL',
@@ -7,6 +7,7 @@ const apiNames = [
   'TextDecoder',
   'MessageEvent',
   'ProgressEvent',
+  'BroadcastChannel',
   'XMLHttpRequestUpload',
   'ReadableStream',
   'ReadableStreamDefaultController',
@@ -30,6 +31,14 @@ const existingApis = Object.fromEntries(
 )
 
 require('@msw/react-native')
+
+const sender = new BroadcastChannel('polyfills-test')
+const receiver = new BroadcastChannel('polyfills-test')
+
+afterAll(() => {
+  sender.close()
+  receiver.close()
+})
 
 test('preserves existing runtime APIs', () => {
   expect(Object.keys(existingApis).length).toBeGreaterThan(0)
@@ -63,4 +72,33 @@ test('checks whether a URL can be parsed', () => {
   expect(canParse('https://msw.test/user')).toBe(true)
   expect(canParse('/user', 'https://msw.test')).toBe(true)
   expect(canParse('http://[')).toBe(false)
+})
+
+test('delivers a message to another channel with the same name', async () => {
+  const message = new Promise<unknown>((resolve) => {
+    receiver.onmessage = (event) => {
+      resolve(event.data)
+    }
+  })
+
+  sender.postMessage('hello')
+
+  await expect(message).resolves.toBe('hello')
+})
+
+test('returns individual Set-Cookie header values', () => {
+  const headers = new Headers()
+  headers.append('Set-Cookie', 'a=1; Expires=Wed, 21 Oct 2015 07:28:00 GMT')
+  headers.append('Set-Cookie', 'b=2; Path=/')
+
+  expect(headers.getSetCookie()).toEqual([
+    'a=1; Expires=Wed, 21 Oct 2015 07:28:00 GMT',
+    'b=2; Path=/',
+  ])
+})
+
+test('returns no Set-Cookie header values if none are set', () => {
+  const headers = new Headers({ 'Content-Type': 'text/plain' })
+
+  expect(headers.getSetCookie()).toEqual([])
 })

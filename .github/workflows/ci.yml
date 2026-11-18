@@ -44,6 +44,14 @@ jobs:
       - name: Validate package
         run: pnpm publint
 
+      # "pod install --deployment" fails if the CocoaPods version
+      # differs from the one recorded in the lockfile.
+      - name: Install CocoaPods
+        working-directory: test/app/ios
+        run: |
+          gem install cocoapods --version "$(awk '/^COCOAPODS:/ { print $2 }' Podfile.lock)" --no-document
+          pod --version
+
       - name: Install iOS pods
         working-directory: test/app/ios
         run: pod install --deployment
