@@ -58,7 +58,7 @@
     }
   },
   "peerDependencies": {
-    "msw": "^2.15.0",
+    "msw": "^3.0.0",
     "react-native": "*"
   },
   "dependencies": {
