@@ -1,7 +1,7 @@
 {
   "type": "module",
   "name": "@msw/react-native",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Mock Service Worker integration for React Native.",
   "scripts": {
     "dev": "tsup --watch",
