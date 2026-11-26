@@ -12,4 +12,18 @@ module.exports = mergeConfig(getDefaultConfig(__dirname), {
       path.resolve(packageRoot, 'node_modules'),
     ],
   },
+  transformer: {
+    /**
+     * @note Disable inline requires to match the default of "@expo/metro-config".
+     * This is the stricter mode: every import is evaluated eagerly, in order.
+     */
+    getTransformOptions: async () => {
+      return {
+        transform: {
+          experimentalImportSupport: false,
+          inlineRequires: false,
+        },
+      }
+    },
+  },
 })
